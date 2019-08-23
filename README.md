@@ -11,7 +11,7 @@ cd ${GOPATH}/src/github.com/seamia/gurl
 dep ensure
 go build
 go install
-ln -s ${GOPATH}/src/gurl /usr/local/bin/gurl
+ln -s ${GOPATH}/bin/gurl /usr/local/bin/gurl
 ```
 
 ## Example
