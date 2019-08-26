@@ -18,6 +18,7 @@ var (
 
 	echoSilent         = false
 	echoDebug          = false
+	echoVerbose        = false
 	echoProgress       = echoDefault
 	echoMapCommand     = echoDefault
 	echoSetCommand     = echoDefault
@@ -26,6 +27,7 @@ var (
 	echoPatchCommand   = echoDefault
 	echoDeleteCommand  = echoDefault
 	echoHeaderCommand  = echoDefault
+	echoIncludeCommand = echoDefault
 	echoEchoCommand    = true
 	echoRequireCommand = echoDefault
 	echoLoadCommand    = echoDefault

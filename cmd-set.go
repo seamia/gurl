@@ -16,7 +16,7 @@ func processSet(params, options string) {
 	}
 
 	switch lower(key) {
-	case "baseurl":
+	case "baseurl", "base.url":
 		baseUrl = value
 
 	/*
@@ -29,6 +29,9 @@ func processSet(params, options string) {
 		case "color":
 			color.NoColor = false
 	*/
+
+	case "quit.on", "quiton":
+		quitOn(value)
 
 	default:
 		quit("Unknown SET: [%s]", key)

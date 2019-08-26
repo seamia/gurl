@@ -92,6 +92,9 @@ func processCmdLine() {
 				// enable debug features here
 				echoDebug = true
 
+			case "-verbose":
+				echoVerbose = true
+
 			case "-curl":
 				generateCurlCommands = true
 

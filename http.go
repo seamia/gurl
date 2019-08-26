@@ -54,7 +54,7 @@ func call(relativeUrl, verb, data string) {
 			response("the request took %s", duration.String())
 		}
 		quitOnError(err, "......")
-
+		quitIfRequired(resp)
 		displayResponse(resp)
 	}
 }

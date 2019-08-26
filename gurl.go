@@ -21,16 +21,28 @@ func main() {
 	loadDefaults()
 
 	printer.Set(debug) // todo: revisit this
+	handlers["include"] = processInclude
 
-	data, err := ioutil.ReadFile(filename())
-	quitOnError(err, "Opening file %s", filename())
+	processFile(filename())
+	/*
+		data, err := ioutil.ReadFile(filename())
+		quitOnError(err, "Opening file %s", filename())
 
-	comment(echoProgress, "Processing file %s", filename())
-	generate("# generating curls commands from %s", filename())
-	currentFile = filename()
-	processScript(string(data))
-
+		comment(echoProgress, "Processing file %s", filename())
+		generate("# generating curls commands from %s", filename())
+		currentFile = filename()
+		processScript(string(data))
+	*/
 	os.Exit(exitCodeOnSuccess)
+}
+
+func processFile(file string) {
+	data, err := ioutil.ReadFile(file)
+	quitOnError(err, "Opening file %s", file)
+
+	comment(echoProgress, "Processing file %s", file)
+	generate("# generating curls commands from %s", file)
+	processChildScript(file, string(data))
 }
 
 func processScript(script string) {
@@ -51,7 +63,7 @@ func processScript(script string) {
 
 		// ignore whitespace
 		line = strings.TrimLeft(line, leadingWhiteSpace)
-		line = strings.TrimRight(line, trainingWhiteSpace)
+		line = strings.TrimRight(line, trailingWhiteSpace)
 
 		if insideCommentBlock {
 			if strings.HasSuffix(line, "*/") {
@@ -72,7 +84,7 @@ func processScript(script string) {
 			continue
 		}
 		if pound := strings.Index(line, commentPrefix); pound > 0 {
-			line = strings.TrimSpace(line[:pound])
+			line = trim(line[:pound])
 		}
 
 		if len(line) == 0 {
@@ -97,10 +109,23 @@ func processScript(script string) {
 	}
 }
 
-func processCommand(command string) {
-	command = strings.TrimSpace(command)
+func processChildScript(name, script string) {
+
+	tmpFile, tmpLineNumber, tmpCommand := currentFile, currentLineNumber, currentCommand
+
+	debug("starting processing [%s]", name)
+	currentFile = name
+	processScript(script)
+	debug("done processing [%s]", name)
+
+	currentFile, currentLineNumber, currentCommand = tmpFile, tmpLineNumber, tmpCommand
+
+}
+
+func processCommand(command string) []string {
+	command = trim(command)
 	if len(command) == 0 {
-		return
+		return nil
 	}
 
 	currentCommand = command
@@ -110,10 +135,15 @@ func processCommand(command string) {
 	if handler, found := handlers[lower(cmd)]; found {
 		handler(payload, options)
 	} else {
+		/*
+			if lower(cmd) == "include" {
+				return processInclude(payload,options)
+			}
+		*/
 		quit("Unknown command [%s]", fullcmd)
 	}
 
-	// fmt.Println("========", command)
+	return nil
 }
 
 type cmdHandler func(params, options string)
@@ -122,6 +152,7 @@ var handlers = map[string]cmdHandler{
 	"set":    processSet,
 	"map":    processMap,
 	"header": processHeader,
+	// 	"include": processInclude,
 
 	"get":    processGet,
 	"patch":  processPatch,

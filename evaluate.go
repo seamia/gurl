@@ -60,8 +60,8 @@ var evaluateMap = map[string]Evaluate{
 func findEvaluator(cmd string) (string, string, Evaluate) {
 	for key, evalFunc := range evaluateMap {
 		if index := strings.Index(cmd, key); index >= 0 {
-			field := strings.TrimSpace(cmd[:index])
-			value := strings.TrimSpace(cmd[index+len(key):])
+			field := trim(cmd[:index])
+			value := trim(cmd[index+len(key):])
 			return field, value, evalFunc
 		}
 	}

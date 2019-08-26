@@ -77,6 +77,9 @@ func report(format string, a ...interface{}) {
 func debug(format string, a ...interface{}) {
 	if echoDebug {
 		colorPrint(colorDebug, format, a...)
+		if echoVerbose {
+			colorPrint(colorVerbose, "\tfile (%s), line (%v), command (%s)", currentFile, currentLineNumber, currentCommand)
+		}
 	}
 }
 
@@ -131,9 +134,9 @@ func splitBy(src, separator string) (string, string) {
 	cmd, payload := src, ""
 	if index := strings.IndexAny(src, separator); index > 0 {
 		cmd = src[:index]
-		payload = strings.TrimSpace(src[index+1:])
+		payload = trim(src[index+1:])
 	}
-	return strings.TrimSpace(cmd), payload
+	return trim(cmd), payload
 }
 
 func multiLineCommand(cmd string) bool {
@@ -178,6 +181,10 @@ func dataPointsToExternalFile(src string) (bool, string) {
 
 func lower(src string) string {
 	return strings.ToLower(src)
+}
+
+func trim(src string) string {
+	return strings.TrimSpace(src)
 }
 
 func generate(format string, a ...interface{}) {

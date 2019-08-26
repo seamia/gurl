@@ -17,7 +17,7 @@ const (
 	itemsSeparator = "/"
 
 	leadingWhiteSpace  = " \t"
-	trainingWhiteSpace = " \t\r\n"
+	trailingWhiteSpace = " \t\r\n"
 
 	commentPrefix             = "#"
 	userAgent                 = "seamia/gurl"
@@ -35,6 +35,7 @@ const (
 	colorUsage             = color.FgHiCyan
 	colorResponse          = color.FgHiMagenta
 	colorDebug             = color.FgMagenta
+	colorVerbose           = color.FgHiBlack
 	colorResponseSuccess   = color.FgHiGreen
 	colorResponseFailure   = color.FgHiRed
 	colorResponseAttention = color.FgYellow
@@ -59,6 +60,8 @@ const (
 
 	echoDefault  = true
 	indexInvalid = -1
+
+	maxIncludesAllowed = 100
 )
 
 var (
