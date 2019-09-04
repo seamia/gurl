@@ -4,7 +4,11 @@
 
 package main
 
-import "github.com/seamia/libs/resolve"
+import (
+	"net/http"
+
+	"github.com/seamia/libs/resolve"
+)
 
 var (
 	baseUrl     = "https://gurl.seamia.net/test"
@@ -31,17 +35,18 @@ var (
 	echoEchoCommand    = true
 	echoRequireCommand = echoDefault
 	echoLoadCommand    = echoDefault
-	echoSectionCommand = echoDefault
+	echoSectionCommand = true
 
 	resolver = resolve.New()
 
 	currentFile       = ""
 	currentLineNumber = 0
 	currentCommand    = ""
+	currentSection    = ""
 
 	responsePrettyPrintBody = responsePrettyPrintBodyDefault
 
-	incrementalCounter int64
+	incrementalCounter int64 // used by ${increment}
 )
 
 const (
@@ -71,7 +76,10 @@ var (
 )
 
 var (
-	savedResponse []byte
+	savedRequest           *http.Request
+	savedResponse          *http.Response
+	savedResponseBody      []byte
+	persistRequestResponse = false
 )
 
 func offline() bool {

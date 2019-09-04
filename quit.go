@@ -38,8 +38,15 @@ func quitOn(value string) {
 		value = trim(value)
 		status, err := strconv.ParseInt(value, 10, 64)
 		quitOnError(err, "cannot convert [%v] to a legit status code", value)
-		debug("adding [%v] as quitting code", status)
-		quittingCodes[int(status)] = true
+
+		if status < 0 {
+			status = -status
+			debug("removing [%v] as quitting code", status)
+			quittingCodes[int(status)] = false
+		} else {
+			debug("adding [%v] as quitting code", status)
+			quittingCodes[int(status)] = true
+		}
 
 		value = remains
 	}
@@ -49,11 +56,31 @@ func quitOn(value string) {
 func quitIfRequired(resp *http.Response) {
 	status := resp.StatusCode
 
-	if _, present := quittingCodes[status]; present {
+	if exit, present := quittingCodes[status]; present && exit {
 		debug("quitting because we hit one of the quitting codes [%v]", status)
 		if echoVerbose {
 			displayResponse(resp)
 		}
+		showRequestResponseInfo()
+
 		quit("Quitting [status: %v]", status)
+	}
+}
+
+func showRequestResponseInfo() {
+	debug("Request/Response Info:")
+	if savedRequest != nil {
+		debug("Verb [%s], URL: [%s]", savedRequest.Method, savedRequest.URL.String())
+	}
+	if savedResponse != nil {
+		debug("Verb [%s], URL: [%s]", savedResponse.Status, savedRequest.URL.String())
+
+		if savedResponse.Header != nil {
+			for key, _ := range savedResponse.Header {
+				if attentionNeeded(key) {
+					debug("Attention [%s]", savedResponse.Header.Get(key))
+				}
+			}
+		}
 	}
 }

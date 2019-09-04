@@ -34,17 +34,17 @@ func preFilter(key string) (bool, string) {
 
 func responseValue(key string) (bool, string) {
 	// global savedResponse []byte
-	if len(savedResponse) == 0 {
+	if len(savedResponseBody) == 0 {
 		return false, key
 	}
 
 	// handle special cases here:
 	if key == includeAllKey {
-		return true, string(savedResponse)
+		return true, string(savedResponseBody)
 	}
 
 	var holder interface{}
-	if err := json.Unmarshal(savedResponse, &holder); err != nil {
+	if err := json.Unmarshal(savedResponseBody, &holder); err != nil {
 		reportError(err, "failed to ingest json from response")
 		return false, key
 	}

@@ -12,14 +12,22 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
+	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/seamia/libs/printer"
 )
 
 func call(relativeUrl, verb, data string) {
+
+	// wipe the slate
+	savedRequest = nil
+	savedResponse = nil
+	savedResponseBody = nil
 
 	u, err := url.Parse(expand(baseUrl))
 	quitOnError(err, "Parsing url [%s]", baseUrl)
@@ -40,6 +48,7 @@ func call(relativeUrl, verb, data string) {
 
 		quitOnError(err, "...")
 
+		// add the headers
 		for key, value := range headers {
 			if len(key) > 0 && len(value) > 0 {
 				request.Header.Set(key, expand(value))
@@ -47,12 +56,23 @@ func call(relativeUrl, verb, data string) {
 		}
 		request.Header.Set("User-Agent", userAgent)
 
+		savedRequest = request
 		start := time.Now()
 		resp, err := client.Do(request)
 		if collectTimingInfo {
 			duration := time.Now().Sub(start)
 			response("the request took %s", duration.String())
 		}
+
+		savedResponse = resp
+		if resp != nil && resp.Body != nil {
+			data, err := ioutil.ReadAll(resp.Body)
+			quitOnError(err, "Ingesting response body")
+			savedResponseBody = data
+		}
+
+		persistIfNecessary()
+
 		quitOnError(err, "......")
 		quitIfRequired(resp)
 		displayResponse(resp)
@@ -74,19 +94,14 @@ func displayResponse(resp *http.Response) {
 	print("Status: %s", resp.Status)
 	displayHeaders(resp, print)
 
-	if resp.Body != nil {
-		data, err := ioutil.ReadAll(resp.Body)
-		quitOnError(err, "Ingesting response body")
-		savedResponse = data
+	if savedResponseBody != nil {
 
 		switch getContentType(resp) {
 		case contentTypeJson:
-			displayJsonBody(data, print)
+			displayJsonBody(savedResponseBody, print)
 		default:
-			displayPlainBody(data, print)
+			displayPlainBody(savedResponseBody, print)
 		}
-	} else {
-		savedResponse = nil
 	}
 	// saveResponse(resp)
 }
@@ -188,4 +203,67 @@ func saveResponse(resp *http.Response) {
 		fmt.Println(err)
 	}
 
+}
+
+var persistenceCounter int64
+
+func persistIfNecessary() {
+	if !persistRequestResponse {
+		return
+	}
+
+	current := atomic.AddInt64(&persistenceCounter, 1)
+	filename := fmt.Sprintf("state_%v.txt", current)
+	file, err := os.Create(filename)
+	if err != nil {
+		reportError(err, "failed to open file [%s]", filename)
+		return
+	}
+	defer file.Close()
+	out := func(format string, args ...interface{}) {
+		_, _ = fmt.Fprintf(file, format+"\n", args...)
+	}
+	saveRequestResponseInfo(out)
+}
+
+func saveRequestResponseInfo(out printer.Printer) {
+	out("Section: [%s]", currentSection)
+	out("Script:  [%s]", currentFile)
+	out("Line:    [%v]", currentLineNumber)
+	out("Command: [%s]", currentCommand)
+	out("")
+
+	out("Request Info:")
+	if savedRequest != nil {
+		out("Verb [%s]", savedRequest.Method)
+		out("URL: [%s]", savedRequest.URL.String())
+		printHeaders(savedRequest.Header, out)
+	}
+
+	out("")
+	out("Response Info:")
+	if savedResponse != nil {
+		out("Status [%s]", savedResponse.Status)
+		printHeaders(savedResponse.Header, out)
+
+		switch getContentType(savedResponse) {
+		case contentTypeJson:
+			displayJsonBody(savedResponseBody, out)
+		default:
+			displayPlainBody(savedResponseBody, out)
+		}
+	}
+}
+
+func printHeaders(head http.Header, out printer.Printer) {
+	all := make([]string, 0, len(head))
+	for key, _ := range head {
+		all = append(all, key)
+	}
+
+	sort.Strings(all)
+
+	for _, key := range all {
+		out("\t[%s]\t [%s]", key, head.Get(key))
+	}
 }

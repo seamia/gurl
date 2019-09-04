@@ -88,7 +88,7 @@ func response(format string, a ...interface{}) {
 }
 
 func responseSuccess(format string, a ...interface{}) {
-	if !isSilent() {
+	if echoVerbose {
 		colorPrint(colorResponseSuccess, format, a...)
 	}
 }

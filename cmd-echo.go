@@ -8,12 +8,14 @@ func processEcho(params, options string) {
 	if offline() {
 		return
 	}
-	comment(echoEchoCommand, "ECHO: %s", expand(params))
+	comment(echoEchoCommand, "%s", expand(params))
 }
 
 func processSection(params, options string) {
 	if offline() {
 		return
 	}
-	section(echoSectionCommand, "%s", expand(params))
+
+	currentSection = expand(params)
+	section(echoSectionCommand, "%s", currentSection)
 }

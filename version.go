@@ -4,4 +4,4 @@
 
 package main
 
-const versionInfo = "version 1.7.9 (Fri 7:20 pm)"
+const versionInfo = "version 1.7.10 (Wed 11:20 am)"

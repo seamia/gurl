@@ -48,6 +48,7 @@ const (
 	fallbackForUnknowBinaryState   = false
 
 	mapSessionKeyName    = "session"
+	mapVesionKeyName     = "version"
 	mapScripFileName     = "script"
 	mapScripFullFileName = "script.full"
 
@@ -58,7 +59,7 @@ const (
 
 	mappingResponseValues = "response:"
 
-	echoDefault  = true
+	echoDefault  = false
 	indexInvalid = -1
 
 	maxIncludesAllowed = 100

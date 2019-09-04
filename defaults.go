@@ -25,6 +25,7 @@ func loadDefaults() {
 
 	// add runtime-based resolutions
 	resolver.Add(mapSessionKeyName, xid.New().String())
+	resolver.Add(mapVesionKeyName, versionInfo)
 
 	if fullpath, err := filepath.Abs(filename()); err == nil {
 		resolver.Add(mapScripFileName, filepath.Base(fullpath))
@@ -94,6 +95,12 @@ func processCmdLine() {
 
 			case "-verbose":
 				echoVerbose = true
+
+			case "-timing":
+				collectTimingInfo = true
+
+			case "-persist":
+				persistRequestResponse = true
 
 			case "-curl":
 				generateCurlCommands = true
