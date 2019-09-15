@@ -60,6 +60,18 @@ func resolveMap(src msi, key string) (bool, string) {
 				return true, txt
 			}*/
 		return resolveAny(data, remainder)
+	} else {
+		if i := strings.Index(key, "=="); i > 0 {
+			left := key[:i]
+			right := key[i+2:]
+			if data, found := src[left]; found {
+				if txt, converts := data.(string); converts {
+					if txt == right {
+						return true, right // why right ????
+					}
+				}
+			}
+		}
 	}
 
 	return notFound()
@@ -118,6 +130,9 @@ func resolveSlice(src slice, key string) (bool, string) {
 		for index, item := range src {
 			if success, value := resolveAny(item, name); success {
 				selector[value] = index
+			} else if success, value := resolveAny(item, first); success {
+				selector[value] = index
+				options = "the-only-one"
 			} else {
 				// ?????
 			}
@@ -135,6 +150,10 @@ func resolveSlice(src slice, key string) (bool, string) {
 			index = selector[keys[len(keys)-1]]
 		case "earliest":
 			index = selector[keys[0]]
+		case "the-only-one":
+			if len(keys) == 1 {
+				index = selector[keys[0]]
+			}
 		}
 	}
 

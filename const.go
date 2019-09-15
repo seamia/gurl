@@ -58,6 +58,7 @@ const (
 	marshalIndent = "    "
 
 	mappingResponseValues = "response:"
+	mappingResponsePrefix = "${" + mappingResponseValues
 
 	echoDefault  = false
 	indexInvalid = -1

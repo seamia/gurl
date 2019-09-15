@@ -22,7 +22,7 @@ func help(txt string) bool {
 
 func usage() {
 	color.Set(colorUsage)
-	fmt.Println("Usage: gurl script.gurl")
+	fmt.Println(usageInfo)
 	fmt.Println(versionInfo)
 	color.Unset()
 
@@ -120,10 +120,6 @@ func filename() string {
 
 func niy() {
 	quit("not implemented yet")
-}
-
-func expand(from string) string {
-	return resolver.Text(from)
 }
 
 func split(src string) (string, string) {

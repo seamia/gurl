@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -29,9 +28,16 @@ func call(relativeUrl, verb, data string) {
 	savedResponse = nil
 	savedResponseBody = nil
 
-	u, err := url.Parse(expand(baseUrl))
-	quitOnError(err, "Parsing url [%s]", baseUrl)
-	u.Path = path.Join(u.Path, expand(relativeUrl))
+	one := expand(baseUrl) + expand(relativeUrl)
+	u, err := url.Parse(one)
+	quitOnError(err, "Parsing url [%s]", one)
+
+	/*
+		u, err := url.Parse(expand(baseUrl))
+		quitOnError(err, "Parsing url [%s]", baseUrl)
+		u.Path = path.Join(u.Path, expand(relativeUrl))
+	*/
+
 	fullUrl := u.String()
 
 	if generateCurlCommands {
@@ -231,6 +237,7 @@ func saveRequestResponseInfo(out printer.Printer) {
 	out("Script:  [%s]", currentFile)
 	out("Line:    [%v]", currentLineNumber)
 	out("Command: [%s]", currentCommand)
+	out("Time:    [%v]", time.Now())
 	out("")
 
 	out("Request Info:")
